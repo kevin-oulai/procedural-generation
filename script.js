@@ -16,17 +16,17 @@ class Room{
     }
 
     isColliding(){
-        let colliding = false;
         for(let room of rooms){
+            if (room.isNull() || room === this) continue;
             if (this.x < room.x + room.width &&
                 this.x + this.width > room.x &&
                 this.y < room.y + room.height &&
                 this.y + this.height > room.y
                 ){
-                print("colliding");
+                return true;
             }
         }
-        return colliding;
+        return false;
     }
 
     isNull(){
@@ -40,17 +40,21 @@ function setup() {
     let windowHeight = window.innerHeight;
     createCanvas(windowWidth, windowHeight);
     background(0);
-    roomNumber = random(5,15);
+    roomNumber = 20;
     for(let i = 0; i < roomNumber; i++){
         rooms[i] = new Room(null, null, null, null);
         while(rooms[i].isNull() || rooms[i].isColliding()){
-            let width = random(100,200);
-            let height = random(100,200);
+            let width = random(100,250);
+            let height = random(100,250);
             let x = random(0,windowWidth - width);
             let y = random(0,windowHeight - height);
             rooms[i] = new Room(x, y, width, height);
         }
     }
+}
+
+function generateTunnel(){
+    
 }
 
 function draw(){
