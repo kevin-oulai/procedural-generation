@@ -1,6 +1,11 @@
 let roomNumber;
+const cellSize = 10;
+
+let rows = Math.floor(window.innerHeight/cellSize);
+let cols = Math.floor(window.innerWidth/cellSize);
 
 let rooms = [];
+let grid = [];
 
 class Room{
     constructor(x,y, width, height){
@@ -36,21 +41,33 @@ class Room{
 
 
 function setup() {
-    let windowWidth = window.innerWidth;
-    let windowHeight = window.innerHeight;
     createCanvas(windowWidth, windowHeight);
     background(0);
     roomNumber = 20;
+    grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+    generateRooms(roomNumber);
+}
+
+function generateRooms(roomNumber){
+    rooms = [];
     for(let i = 0; i < roomNumber; i++){
         rooms[i] = new Room(null, null, null, null);
         while(rooms[i].isNull() || rooms[i].isColliding()){
-            let width = random(100,250);
-            let height = random(100,250);
-            let x = random(0,windowWidth - width);
-            let y = random(0,windowHeight - height);
+            let width = floor(random(10,15));
+            let height = floor(random(10,15));
+            let x = floor(random(0,cols - width - 1));
+            let y = floor(random(0,rows - height - 1));
             rooms[i] = new Room(x, y, width, height);
+
+            for (let yy = y; yy < y + height; yy++) {
+                for (let xx = x; xx < x + width; xx++) {
+                grid[yy][xx] = 1;
+                }
+            }
         }
     }
+
 }
 
 function generateTunnel(){
@@ -58,7 +75,24 @@ function generateTunnel(){
 }
 
 function draw(){
-    for(let i = 0; i < roomNumber; i++){
-        rooms[i].show();
+for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === 1) {
+        if(grid[y+1][x] !== 1 || grid[y][x+1] !== 1 || grid[y-1][x] !== 1 || grid[y][x-1] !== 1){
+            stroke(200);
+            fill(200);
+        }
+        else{
+            stroke(255);
+            fill(255);
+        }
+        rect(x * cellSize, y * cellSize, cellSize, cellSize);
+      }
     }
+  }
+}
+
+// Move on canva with mouse
+function mouseDragged(){
+    translate(mouseX - pmouseX, mouseY - pmouseY);
 }
