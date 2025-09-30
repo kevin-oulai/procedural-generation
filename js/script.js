@@ -37,13 +37,29 @@ class Room{
     isNull(){
         return this.x == null && this.y == null && this.height == null && this.width == null;
     }
+
+    randomSide(){
+        let side = floor(random(4));
+        switch (side) {
+            case 1: // top
+                return { x: floor(random(this.x, this.x + this.width)), y: this.y - 1 }
+            case 2: // bottom
+                return { x: floor(random(this.x, this.x + this.width)), y: this.y + this.height }
+            case 3: // left
+                return { x: this.x - 1, y: floor(random(this.y, this.y + this.height)) }
+            case 4: // right
+                return { x: this.x + this.width, y: floor(random(this.y, this.y + this.height)) }
+            default:
+                break;
+        }
+    }
 }
 
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(0);
-    roomNumber = 20;
+    roomNumber = 15;
     grid = Array.from({ length: rows }, () => Array(cols).fill(0));
 
     generateRooms(roomNumber);
@@ -56,8 +72,8 @@ function generateRooms(roomNumber){
         while(rooms[i].isNull() || rooms[i].isColliding()){
             let width = floor(random(10,15));
             let height = floor(random(10,15));
-            let x = floor(random(0,cols - width - 1));
-            let y = floor(random(0,rows - height - 1));
+            let x = floor(random(0,cols - width));
+            let y = floor(random(0,rows - height));
             rooms[i] = new Room(x, y, width, height);
 
             for (let yy = y; yy < y + height; yy++) {
@@ -65,7 +81,10 @@ function generateRooms(roomNumber){
                 grid[yy][xx] = 1;
                 }
             }
+
         }
+        console.log(rooms[i].randomSide());
+        rect(rooms[i].randomSide().x, rooms[i].randomSide().y, 5, 5);
     }
 
 }
@@ -78,14 +97,39 @@ function draw(){
 for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === 1) {
-        if(grid[y+1][x] !== 1 || grid[y][x+1] !== 1 || grid[y-1][x] !== 1 || grid[y][x-1] !== 1){
+        const neighbors = [
+            [1, 0],   // down
+            [0, 1],   // right
+            [1, 1],   // down-right
+            [-1, 0],  // up
+            [0, -1],  // left
+            [-1, -1], // up-left
+            [1, -1],  // down-left
+            [-1, 1],  // up-right
+        ];
+        
+        let isWall = false;
+        
+        for (let [dy, dx] of neighbors) {
+            const ny = y + dy;
+            const nx = x + dx;
+        
+            if (ny >= 0 && ny < grid.length && nx >= 0 && nx < grid[0].length) {
+                if (grid[ny][nx] !== 1) {
+                    isWall = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isWall) {
             stroke(200);
             fill(200);
-        }
-        else{
+        } else {
             stroke(255);
             fill(255);
         }
+        
         rect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
     }
